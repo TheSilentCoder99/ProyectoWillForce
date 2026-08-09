@@ -1,0 +1,1 @@
+data class Desafio(val nombre: String, val racha: Int)
