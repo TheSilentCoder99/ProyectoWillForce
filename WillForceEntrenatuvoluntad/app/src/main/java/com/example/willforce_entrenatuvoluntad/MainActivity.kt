@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -25,7 +26,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -150,6 +153,8 @@ val frasesAleatorias = listOf(
     "La excelencia no es un destino, es un viaje continuo.",
     "Cree en ti mismo y todo lo demás será más fácil."
 )
+
+
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -191,6 +196,12 @@ class MainActivity : ComponentActivity() {
 //Según entiendo, la etiqueta Composable lo que hace es indicar que esa función forma parte de la UI de la app y su estado puede ir variando
 @Composable
 fun PantallaPrincipal(modifier: Modifier = Modifier, navController: NavHostController) {
+
+//    Guardo el estado del random que elige las frases. Es decir, mantengo la frase "quieta".
+    var frase by remember {
+        mutableStateOf(frasesAleatorias.random())
+    }
+
 //    Se forma una columna. Entre sus parentesis metes las características propias de esa columna. Entre sus corchetes toddo lo que contendrá esa columna.
     Column(
         modifier = modifier
@@ -225,14 +236,17 @@ fun PantallaPrincipal(modifier: Modifier = Modifier, navController: NavHostContr
         }
 
         Row(
-            modifier = modifier
-            .background(Color(0xFFF3F7E8)) // verde muy claro de fondo
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 40.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
         )
         {
-           Text(text = frasesAleatorias.random(),
+           Text(text = frase,
                fontSize = 25.sp,
                fontWeight = FontWeight.Bold,
-               color = Color(0xFF1B5E20))
+               color = Color(0xFF111184))
         }
     }
 }
