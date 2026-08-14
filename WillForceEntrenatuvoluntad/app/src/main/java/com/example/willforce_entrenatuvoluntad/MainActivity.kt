@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,7 +36,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -44,8 +48,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.willforce_entrenatuvoluntad.ui.theme.WillForceEntrenaTuVoluntadTheme
+import kotlinx.coroutines.delay
 import pantallas.PantallaConceptosClave
 import pantallas.PantallaDesafios
+import kotlin.time.Duration.Companion.milliseconds
 
 //lista con las frases motivadoras a mostrar en la pantalla de inicio
 val frasesAleatorias = listOf(
@@ -154,7 +160,6 @@ val frasesAleatorias = listOf(
     "Cree en ti mismo y todo lo demás será más fácil."
 )
 
-
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -197,10 +202,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun PantallaPrincipal(modifier: Modifier = Modifier, navController: NavHostController) {
 
-//    Guardo el estado del random que elige las frases. Es decir, mantengo la frase "quieta".
-    var frase by remember {
-        mutableStateOf(frasesAleatorias.random())
-    }
 
 //    Se forma una columna. Entre sus parentesis metes las características propias de esa columna. Entre sus corchetes toddo lo que contendrá esa columna.
     Column(
@@ -243,13 +244,46 @@ fun PantallaPrincipal(modifier: Modifier = Modifier, navController: NavHostContr
             verticalAlignment = Alignment.CenterVertically
         )
         {
-           Text(text = frase,
-               fontSize = 25.sp,
-               fontWeight = FontWeight.Bold,
-               color = Color(0xFF111184))
+            FraseAleatoria();
         }
     }
 }
+
+
+@Composable
+fun FraseAleatoria() {
+
+    //    Guardo el estado del random que elige las frases. Es decir, mantengo la frase "quieta". Solamente cambiará cuando cambie la pantalla. Es decir, no cambiará ante cualquier recomposición, o sea, ante cualquier click.
+    var fraseAleatoria by remember {
+        mutableStateOf(frasesAleatorias.random())
+    }
+
+//    Launchedeffect() Inicia una subrutina asociada solamente a este composable. Después delay pasa su ejecución durante 15 segundos y finalmente muestra la frase. Toodo esto ocurre únicamente dentro del composable que representa FraseAleatoria()
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(15_000.milliseconds)
+            fraseAleatoria = frasesAleatorias.random()
+        }
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+            .padding(20.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = fraseAleatoria,
+            fontSize = 25.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF1B5E20),
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
 
 @Composable
 fun TituloSeccion(texto: String, onClick: () -> Unit) {

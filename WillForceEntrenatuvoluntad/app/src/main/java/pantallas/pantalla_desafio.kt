@@ -35,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 
+
 //Lista con los desafíos a mostrar en cada tarjeta
 @RequiresApi(Build.VERSION_CODES.O)
 val listaDeDesafios = listOf(
