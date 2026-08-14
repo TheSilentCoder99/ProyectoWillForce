@@ -17,7 +17,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -27,97 +26,29 @@ import androidx.navigation.NavController
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.ui.text.font.FontWeight
-import java.time.Instant
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.runtime.Composable
+import java.time.Instant
 
 
 //Lista con los desafíos a mostrar en cada tarjeta
 @RequiresApi(Build.VERSION_CODES.O)
+
 val listaDeDesafios = listOf(
-    Desafio(
-        id = 1,
-        nombre = "24 horas sin redes sociales",
-        descripcion = "Pasa 24 horas sin utilizar redes sociales. Cuando aparezca el impulso de abrirlas, observa el impulso sin actuar sobre él.",
-        fechaInicio = Instant.parse("2026-08-10T00:00:00Z"),
-        fechaObjetivo = Instant.parse("2026-08-11T00:00:00Z")
-    ),
-
-    Desafio(
-        id = 2,
-        nombre = "Una semana sin comida basura",
-        descripcion = "Durante siete días evita la comida basura y los alimentos que consumes principalmente por impulso o deseo momentáneo.",
-        fechaInicio = Instant.parse("2026-08-10T00:00:00Z"),
-        fechaObjetivo = Instant.parse("2026-08-17T00:00:00Z")
-    ),
-
-    Desafio(
-        id = 3,
-        nombre = "Duchas frías durante 7 días",
-        descripcion = "Durante siete días termina cada ducha con agua fría durante al menos 60 segundos. El objetivo es aprender a tolerar voluntariamente una incomodidad.",
-        fechaInicio = Instant.parse("2026-08-10T00:00:00Z"),
-        fechaObjetivo = Instant.parse("2026-08-17T00:00:00Z")
-    ),
-
-    Desafio(
-        id = 4,
-        nombre = "Una semana sin entretenimiento digital",
-        descripcion = "Durante siete días evita vídeos, series, videojuegos y otras formas de entretenimiento digital durante tu tiempo libre.",
-        fechaInicio = Instant.parse("2026-08-10T00:00:00Z"),
-        fechaObjetivo = Instant.parse("2026-08-17T00:00:00Z")
-    ),
-
-    Desafio(
-        id = 5,
-        nombre = "Levantarse sin posponer la alarma",
-        descripcion = "Durante siete días, cuando suene la alarma, levántate inmediatamente sin utilizar el botón de posponer.",
-        fechaInicio = Instant.parse("2026-08-10T00:00:00Z"),
-        fechaObjetivo = Instant.parse("2026-08-17T00:00:00Z")
-    ),
-
-    Desafio(
-        id = 6,
-        nombre = "Caminar sin distracciones",
-        descripcion = "Durante siete días realiza una caminata diaria sin música, podcasts, vídeos ni otras formas de entretenimiento.",
-        fechaInicio = Instant.parse("2026-08-10T00:00:00Z"),
-        fechaObjetivo = Instant.parse("2026-08-17T00:00:00Z")
-    ),
-
-    Desafio(
-        id = 7,
-        nombre = "Una semana sin quejas",
-        descripcion = "Durante siete días evita quejarte voluntariamente. Cuando aparezca una queja, intenta transformarla en una acción o acepta la situación.",
-        fechaInicio = Instant.parse("2026-08-10T00:00:00Z"),
-        fechaObjetivo = Instant.parse("2026-08-17T00:00:00Z")
-    ),
-
-    Desafio(
-        id = 8,
-        nombre = "Retrasar los impulsos",
-        descripcion = "Durante siete días, cada vez que sientas un impulso innecesario de mirar el móvil, comer o distraerte, espera diez minutos antes de decidir.",
-        fechaInicio = Instant.parse("2026-08-10T00:00:00Z"),
-        fechaObjetivo = Instant.parse("2026-08-17T00:00:00Z")
-    ),
-
-    Desafio(
-        id = 9,
-        nombre = "Hacer primero lo incómodo",
-        descripcion = "Durante siete días comienza cada jornada realizando durante al menos 20 minutos una tarea que normalmente tenderías a posponer.",
-        fechaInicio = Instant.parse("2026-08-10T00:00:00Z"),
-        fechaObjetivo = Instant.parse("2026-08-17T00:00:00Z")
-    ),
-
-    Desafio(
-        id = 10,
-        nombre = "Un día de austeridad",
-        descripcion = "Durante 24 horas evita deliberadamente algunos lujos y comodidades que das por sentados para comprobar que puedes estar bien con menos.",
-        fechaInicio = Instant.parse("2026-08-10T00:00:00Z"),
-        fechaObjetivo = Instant.parse("2026-08-11T00:00:00Z")
-    ),
     Desafio(
         id = 11,
         nombre = "Ayuno intermitente de 16 horas",
@@ -127,8 +58,8 @@ val listaDeDesafios = listOf(
             el estrés metabólico moderado activa mecanismos de reparación celular y mejora la sensibilidad a la insulina. 
             Observa cómo el hambre aparece y desaparece en oleadas, y cómo tu mente aprende que no es una emergencia.
         """.trimIndent(),
-        fechaInicio = Instant.parse("2026-08-10T20:00:00Z"),
-        fechaObjetivo = Instant.parse("2026-08-11T12:00:00Z")
+        fechaInicio = null,
+        fechaObjetivo = null
     ),
 
     Desafio(
@@ -139,8 +70,8 @@ val listaDeDesafios = listOf(
             Describe tus preocupaciones del día siguiente como si las observaras desde la estratosfera, reduciendo su importancia. 
             Este ejercicio fortalece la capacidad de relativizar problemas y separar lo urgente de lo verdaderamente importante.
         """.trimIndent(),
-        fechaInicio = Instant.parse("2026-08-10T06:00:00Z"),
-        fechaObjetivo = Instant.parse("2026-08-17T06:00:00Z")
+        fechaInicio = null,
+        fechaObjetivo = null
     ),
 
     Desafio(
@@ -151,8 +82,8 @@ val listaDeDesafios = listOf(
             Este desafío combate la adaptación hedónica al entrenar la atención plena sobre la naturaleza transitoria de toda experiencia. 
             Al notar que el placer y el dolor son pasajeros, reduces la tendencia a aferrarte a lo agradable y a rechazar lo desagradable.
         """.trimIndent(),
-        fechaInicio = Instant.parse("2026-08-10T07:00:00Z"),
-        fechaObjetivo = Instant.parse("2026-08-15T07:00:00Z")
+        fechaInicio = null,
+        fechaObjetivo = null
     ),
 
     Desafio(
@@ -164,8 +95,8 @@ val listaDeDesafios = listOf(
             Este ejercicio lucha contra la adaptación hedónica al forzarte a encontrar novedad en tu vida cotidiana, 
             entrenando tu cerebro para no dar por sentado lo que tienes.
         """.trimIndent(),
-        fechaInicio = Instant.parse("2026-08-10T22:00:00Z"),
-        fechaObjetivo = Instant.parse("2026-08-17T22:00:00Z")
+        fechaInicio = null,
+        fechaObjetivo = null
     ),
 
     Desafio(
@@ -177,8 +108,8 @@ val listaDeDesafios = listOf(
             Este desafío de incomodidad controlada te enfrenta al vacío y a tus propios pensamientos, 
             fortaleciendo tu capacidad de estar contigo mismo sin estímulos externos.
         """.trimIndent(),
-        fechaInicio = Instant.parse("2026-08-10T06:30:00Z"),
-        fechaObjetivo = Instant.parse("2026-08-17T06:30:00Z")
+        fechaInicio = null,
+        fechaObjetivo = null
     ),
 
     Desafio(
@@ -190,8 +121,8 @@ val listaDeDesafios = listOf(
             Este desafío practica la incomodidad controlada y demuestra el principio de hormesis: 
             la exposición moderada a temperaturas extremas activa mecanismos de termorregulación y fortalece el sistema cardiovascular.
         """.trimIndent(),
-        fechaInicio = Instant.parse("2026-08-10T08:00:00Z"),
-        fechaObjetivo = Instant.parse("2026-08-11T08:00:00Z")
+        fechaInicio = null,
+        fechaObjetivo = null
     ),
 
     Desafio(
@@ -202,8 +133,8 @@ val listaDeDesafios = listOf(
             Este desafío entrena la fuerza de voluntad al eliminar el hábito de la procrastinación y 
             desarrollar la disciplina de actuar sin darle tiempo a la mente para generar resistencia.
         """.trimIndent(),
-        fechaInicio = Instant.parse("2026-08-10T00:00:00Z"),
-        fechaObjetivo = Instant.parse("2026-08-17T00:00:00Z")
+        fechaInicio = null,
+        fechaObjetivo = null
     ),
 
     Desafio(
@@ -215,8 +146,8 @@ val listaDeDesafios = listOf(
             y entrena la fuerza de voluntad al resistir los antojos que aparecerán los primeros días. 
             Observa cómo el sabor de los alimentos naturales se vuelve más intenso.
         """.trimIndent(),
-        fechaInicio = Instant.parse("2026-08-10T00:00:00Z"),
-        fechaObjetivo = Instant.parse("2026-08-15T00:00:00Z")
+        fechaInicio = null,
+        fechaObjetivo = null
     ),
 
     Desafio(
@@ -228,8 +159,8 @@ val listaDeDesafios = listOf(
             Este desafío de incomodidad controlada te obliga a enfrentar el aburrimiento y la inquietud, 
             y te permite experimentar cómo la ausencia de estímulos digitales mejora la calidad del sueño y la claridad mental.
         """.trimIndent(),
-        fechaInicio = Instant.parse("2026-08-10T21:00:00Z"),
-        fechaObjetivo = Instant.parse("2026-08-17T21:00:00Z")
+        fechaInicio = null,
+        fechaObjetivo = null
     ),
 
     Desafio(
@@ -242,10 +173,11 @@ val listaDeDesafios = listOf(
             y combate la adaptación hedónica al demostrar que la mayoría de los deseos impulsivos desaparecen por sí solos, 
             liberándote del ciclo de gratificación inmediata y posterior vacío.
         """.trimIndent(),
-        fechaInicio = Instant.parse("2026-08-10T00:00:00Z"),
-        fechaObjetivo = Instant.parse("2026-08-17T00:00:00Z")
+        fechaInicio = null,
+        fechaObjetivo = null
     )
-);
+)
+
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -281,11 +213,56 @@ fun PantallaDesafios(navController: NavController, modifier: Modifier = Modifier
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AbrirCalendario(
+    onFechaSeleccionada: (Instant) -> Unit,
+    onCerrar: () -> Unit
+) {
+    val datePickerState = rememberDatePickerState()
+    DatePickerDialog(
+        onDismissRequest = onCerrar,
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    val fechaMillis = datePickerState.selectedDateMillis
 
+                    if (fechaMillis != null) {
+                        val fecha = Instant.ofEpochMilli(fechaMillis)
+                        onFechaSeleccionada(fecha)
+                    }
 
+                    onCerrar()
+                }
+            ) {
+                Text("Comenzar")
+            }
+        },
+
+        dismissButton = {
+            TextButton(
+                onClick = onCerrar
+            ) {
+                Text("Cancelar")
+            }
+        }
+    ) {
+        DatePicker(
+            state = datePickerState
+        )
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TarjetaDesafio(desafio: Desafio, modifier: Modifier = Modifier) {
     var expanded by remember { mutableStateOf(false) }
+
+    var mostrarCalendario by remember {
+        mutableStateOf(false)
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -309,6 +286,49 @@ fun TarjetaDesafio(desafio: Desafio, modifier: Modifier = Modifier) {
                 color = Color(0xFF33691E),
                 modifier = Modifier.padding(top = 8.dp)
             )
-        }
+//            Un botón que va dentro de cada tarjeta. Al pulsarse abre el calendario de la UI de cual se elige la fecha
+            Button(
+                onClick = {
+                    mostrarCalendario = true
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 15.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF1B5E20),
+                    contentColor = Color.White
+                ),
+
+            )
+//            Aquí empieza el contenido del botón
+            {
+                Icon(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = "Comenzar desafío"
+                )
+                // Espacio entre icono y texto
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = "Comenzar desafío",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+
+            if (mostrarCalendario) {
+                AbrirCalendario(
+                    onFechaSeleccionada = { fecha ->
+                        println("Fecha seleccionada: $fecha")
+                    },
+                    onCerrar = {
+                        mostrarCalendario = false
+                    }
+                )
+            }
     }
+}
+
+
 }
