@@ -34,15 +34,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
+import kotlinx.coroutines.delay
+import java.time.Duration
 import java.time.Instant
+import kotlin.time.Duration.Companion.milliseconds
 
 
 //Lista con los desafíos a mostrar en cada tarjeta
@@ -178,7 +180,7 @@ val listaDeDesafios = listOf(
     )
 )
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.S)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaDesafios(navController: NavController, modifier: Modifier = Modifier) {
@@ -217,12 +219,14 @@ fun PantallaDesafios(navController: NavController, modifier: Modifier = Modifier
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AbrirCalendario(
-    onFechaSeleccionada: (Instant) -> Unit,
-    onCerrar: () -> Unit
+    FechaSeleccionada: (Instant) -> Unit,
+    CerrarCalendario: () -> Unit
 ) {
     val datePickerState = rememberDatePickerState()
     DatePickerDialog(
-        onDismissRequest = onCerrar,
+        onDismissRequest = CerrarCalendario,
+
+//        Qué ocurre al pulsar el botón confirmar
         confirmButton = {
             TextButton(
                 onClick = {
@@ -230,19 +234,20 @@ fun AbrirCalendario(
 
                     if (fechaMillis != null) {
                         val fecha = Instant.ofEpochMilli(fechaMillis)
-                        onFechaSeleccionada(fecha)
+                        FechaSeleccionada(fecha)
                     }
 
-                    onCerrar()
+                    CerrarCalendario()
                 }
             ) {
-                Text("Comenzar")
+                Text("Comenzar desafío")
             }
         },
 
+//        Qué ocurre al pulsar el botón cerrar
         dismissButton = {
             TextButton(
-                onClick = onCerrar
+                onClick = CerrarCalendario
             ) {
                 Text("Cancelar")
             }
@@ -254,23 +259,59 @@ fun AbrirCalendario(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+
+@RequiresApi(Build.VERSION_CODES.S)
+@Composable
+fun CuentaAtras(
+    fechaInicio: Instant,
+    fechaObjetivo: Instant
+) {
+    var tiempoRestante by remember {
+        mutableStateOf(
+            Duration.between(
+                Instant.now(),
+                fechaObjetivo
+            )
+        )
+    }
+
+    LaunchedEffect(fechaObjetivo) {
+        while (true) {
+            tiempoRestante = Duration.between(
+                Instant.now(),
+                fechaObjetivo
+            )
+            delay(1000.milliseconds)
+        }
+    }
+
+    if (tiempoRestante.isNegative || tiempoRestante.isZero) {
+        Text("Desafío completado")
+    } else {
+        Text(
+            text = "${tiempoRestante.toDays()} días " +
+                    "${tiempoRestante.toHoursPart()} horas " +
+                    "${tiempoRestante.toMinutesPart()} minutos " +
+                    "${tiempoRestante.toSecondsPart()} segundos"
+        )
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun TarjetaDesafio(desafio: Desafio, modifier: Modifier = Modifier) {
-    var expanded by remember { mutableStateOf(false) }
 
-    var mostrarCalendario by remember {
-        mutableStateOf(false)
-    }
+    var expanded by remember { mutableStateOf(false) }
+    var mostrarCalendario by remember { mutableStateOf(false) }
+    var fechaInicio by remember { mutableStateOf<Instant?>(null) }
+    var fechaObjetivo by remember { mutableStateOf<Instant?>(null) }
 
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(Color(0xFFE8F5E9))
-            .clickable{
-                expanded = !expanded
-            }
+            .clickable { expanded = !expanded }
             .padding(16.dp)
     ) {
         Text(
@@ -279,56 +320,69 @@ fun TarjetaDesafio(desafio: Desafio, modifier: Modifier = Modifier) {
             fontWeight = FontWeight.Bold,
             color = Color(0xFF1B5E20)
         )
-        if(expanded){
+
+        if (expanded) {
             Text(
                 text = desafio.descripcion,
                 fontSize = 14.sp,
                 color = Color(0xFF33691E),
                 modifier = Modifier.padding(top = 8.dp)
             )
-//            Un botón que va dentro de cada tarjeta. Al pulsarse abre el calendario de la UI de cual se elige la fecha
-            Button(
-                onClick = {
-                    mostrarCalendario = true
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 15.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF1B5E20),
-                    contentColor = Color.White
-                ),
 
-            )
-//            Aquí empieza el contenido del botón
-            {
-                Icon(
-                    imageVector = Icons.Default.PlayArrow,
-                    contentDescription = "Comenzar desafío"
+            if (fechaInicio == null) {
+                // --- Estado: no iniciado ---
+                Button(
+                    onClick = { mostrarCalendario = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 15.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF1B5E20),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Icon(imageVector = Icons.Default.PlayArrow, contentDescription = "Comenzar desafío")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Comenzar desafío", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
+
+                if (mostrarCalendario) {
+                    AbrirCalendario(
+                        FechaSeleccionada = { fecha ->
+                            fechaInicio = Instant.now()
+                            fechaObjetivo = fecha
+                        },
+                        CerrarCalendario = { mostrarCalendario = false }
+                    )
+                }
+
+            } else {
+                // --- Estado: desafío iniciado ---
+                CuentaAtras(
+                    fechaInicio = fechaInicio!!,
+                    fechaObjetivo = fechaObjetivo!!
                 )
-                // Espacio entre icono y texto
-                Spacer(modifier = Modifier.width(8.dp))
 
-                Text(
-                    text = "Comenzar desafío",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-
-            if (mostrarCalendario) {
-                AbrirCalendario(
-                    onFechaSeleccionada = { fecha ->
-                        println("Fecha seleccionada: $fecha")
+                Button(
+                    onClick = {
+                        fechaInicio = null
+                        fechaObjetivo = null
                     },
-                    onCerrar = {
-                        mostrarCalendario = false
-                    }
-                )
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 15.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Red,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Icon(imageVector = Icons.Default.PlayArrow, contentDescription = "Detener desafío")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Detener desafío", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
             }
+        }
     }
-}
-
-
 }
