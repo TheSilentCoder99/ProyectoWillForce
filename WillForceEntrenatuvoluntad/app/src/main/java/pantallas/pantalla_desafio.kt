@@ -32,6 +32,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
@@ -297,14 +298,39 @@ fun CuentaAtras(
     }
 }
 
+@Composable
+fun MostrarDialogo(
+    onConfirmar: () -> Unit,
+    onCancelar: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onCancelar,
+        title = { Text("Confirmar") },
+        text = { Text("¿Deseas detener este desafío?") },
+        confirmButton = {
+            TextButton(onClick = onConfirmar) {
+                Text("Aceptar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onCancelar) {
+                Text("Cancelar")
+            }
+        }
+    )
+}
+
+
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun TarjetaDesafio(desafio: Desafio, modifier: Modifier = Modifier) {
 
+//    VARIABLES DE ESTADO MUTABLES. SU ESTADO ES RECORDADO POR EL PROGRAMA ENTRE CADA VARIACIÓN DE COMPOSE
     var expanded by remember { mutableStateOf(false) }
     var mostrarCalendario by remember { mutableStateOf(false) }
     var fechaInicio by remember { mutableStateOf<Instant?>(null) }
     var fechaObjetivo by remember { mutableStateOf<Instant?>(null) }
+    var mostrarDialogo by remember { mutableStateOf(false) }   // ← nueva
 
     Column(
         modifier = modifier
@@ -329,9 +355,11 @@ fun TarjetaDesafio(desafio: Desafio, modifier: Modifier = Modifier) {
                 modifier = Modifier.padding(top = 8.dp)
             )
 
+//            SI LA FECHA DE INICIO ES NULA, SE DA LA OPCIÓN DE INICIAR EL DESAFÍO
             if (fechaInicio == null) {
                 // --- Estado: no iniciado ---
                 Button(
+//                    AL PULSAR EL BOTÓN, SE MUESTRA EL CALENDARIO DESDE EL CUAL SE TOMA LA FECHA CON LA QUE SE CONSTRUYE LA CUENTA ATRÁS DEL DESAFÍO
                     onClick = { mostrarCalendario = true },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -347,6 +375,7 @@ fun TarjetaDesafio(desafio: Desafio, modifier: Modifier = Modifier) {
                     Text("Comenzar desafío", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
 
+//                SI SE MUESTRA EL CALENDARIO, SE LLAMA A LA FUNCIÓN ABRIR CALENDARIO. ESTA FUNCIÓN RECIBE COMO PARÁMETRO LA MISMA FECHA QUE SE ELIGE DESDE EL CALENDARIO.
                 if (mostrarCalendario) {
                     AbrirCalendario(
                         FechaSeleccionada = { fecha ->
@@ -359,15 +388,15 @@ fun TarjetaDesafio(desafio: Desafio, modifier: Modifier = Modifier) {
 
             } else {
                 // --- Estado: desafío iniciado ---
+//                SE TOMA LA FECHA INICIO (SIEMPRE LA FECHA ACTUAL) Y EL VALOR DE FECHA OBJETIVO (LA FECHA ELEGIDA Y GUARDADA DESDE EL CALENDARIO). ESTOS DATOS SE TRATAN COMO SI NO PUDIERAN SER NULOS.
                 CuentaAtras(
                     fechaInicio = fechaInicio!!,
                     fechaObjetivo = fechaObjetivo!!
                 )
-
+//                SI SE PULSA EL BOTÓN DE INICIAR DESAFÍO, SE ABRE LA FUNCIÓN DEL DIÁLOGO DE CONFIRMACIÓN
                 Button(
                     onClick = {
-                        fechaInicio = null
-                        fechaObjetivo = null
+                        mostrarDialogo = true
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -382,7 +411,20 @@ fun TarjetaDesafio(desafio: Desafio, modifier: Modifier = Modifier) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Detener desafío", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
+
+//                SI EL RESULTADO DE LA CONFIRMACIÓN ES POSITIVO (DETENER EL DESAFÍO) SE ANULA LA CUENTA ATRÁS Y SE CIERRA EL DIÁLOGO
+                if (mostrarDialogo) {
+                    MostrarDialogo(
+                        onConfirmar = {
+                            fechaInicio = null
+                            fechaObjetivo = null
+                            mostrarDialogo = false
+                        },
+                        onCancelar = {
+                            mostrarDialogo = false
+                            })
             }
         }
     }
+}
 }
