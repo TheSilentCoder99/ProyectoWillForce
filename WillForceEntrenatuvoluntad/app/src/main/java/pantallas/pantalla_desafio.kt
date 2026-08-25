@@ -1,6 +1,7 @@
 package pantallas
 
 import Desafio
+import android.media.SoundPool
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -42,6 +43,8 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import kotlinx.coroutines.delay
 import java.time.Duration
 import java.time.Instant
@@ -276,6 +279,18 @@ fun CuentaAtras(
         )
     }
 
+    val context = LocalContext.current
+
+    val soundPool = remember {
+        SoundPool.Builder()
+            .setMaxStreams(1)
+            .build()
+    }
+
+    val sonidoSuccess = remember {
+        soundPool.load(context, R,1)
+    }
+
     LaunchedEffect(fechaObjetivo) {
         while (true) {
             tiempoRestante = Duration.between(
@@ -286,14 +301,32 @@ fun CuentaAtras(
         }
     }
 
+//    ESTILIZACIÓN DE LA CUENTA ATRÁS
     if (tiempoRestante.isNegative || tiempoRestante.isZero) {
-        Text("Desafío completado")
+//        ¿POSIBILIDAD DE ALGÚN SONIDO O ANIMACIÓN?
+        Text(
+            text = "¡Desafío completado!",
+            fontSize = 25.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF1B5E20),
+            textAlign = TextAlign.Center,
+        )
+
+        LaunchedEffect(Unit) {
+            soundPool.play(sonidoSuccess, 1f, 1f, 0, 0, 1f)
+        }
+
+
     } else {
         Text(
             text = "${tiempoRestante.toDays()} días " +
                     "${tiempoRestante.toHoursPart()} horas " +
                     "${tiempoRestante.toMinutesPart()} minutos " +
-                    "${tiempoRestante.toSecondsPart()} segundos"
+                    "${tiempoRestante.toSecondsPart()} segundos",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Blue,
+            modifier = Modifier.padding(top = 8.dp),
         )
     }
 }
@@ -370,7 +403,10 @@ fun TarjetaDesafio(desafio: Desafio, modifier: Modifier = Modifier) {
                         contentColor = Color.White
                     )
                 ) {
-                    Icon(imageVector = Icons.Default.PlayArrow, contentDescription = "Comenzar desafío")
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = "Comenzar desafío"
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Comenzar desafío", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
@@ -407,7 +443,10 @@ fun TarjetaDesafio(desafio: Desafio, modifier: Modifier = Modifier) {
                         contentColor = Color.White
                     )
                 ) {
-                    Icon(imageVector = Icons.Default.PlayArrow, contentDescription = "Detener desafío")
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = "Detener desafío"
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Detener desafío", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
@@ -422,9 +461,9 @@ fun TarjetaDesafio(desafio: Desafio, modifier: Modifier = Modifier) {
                         },
                         onCancelar = {
                             mostrarDialogo = false
-                            })
+                        })
+                }
             }
         }
     }
-}
 }
