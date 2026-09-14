@@ -1,6 +1,6 @@
 package pantallas
 
-import Desafio
+import DataClass.Desafio
 import android.media.SoundPool
 import android.os.Build
 import androidx.annotation.RequiresApi

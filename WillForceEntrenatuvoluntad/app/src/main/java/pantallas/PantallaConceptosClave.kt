@@ -1,8 +1,6 @@
 package pantallas
 
-import Concepto
-import Desafio
-import android.R.attr.padding
+import DataClass.Concepto
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
