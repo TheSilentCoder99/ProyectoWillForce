@@ -45,6 +45,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import com.example.willforce_entrenatuvoluntad.R
 import kotlinx.coroutines.delay
 import java.time.Duration
 import java.time.Instant
@@ -279,16 +280,10 @@ fun CuentaAtras(
         )
     }
 
-    val context = LocalContext.current
-
-    val soundPool = remember {
-        SoundPool.Builder()
-            .setMaxStreams(1)
-            .build()
-    }
-
-    val sonidoSuccess = remember {
-        soundPool.load(context, R,1)
+    var mostrarBoton by remember {
+        mutableStateOf(
+            false
+        )
     }
 
     LaunchedEffect(fechaObjetivo) {
@@ -297,24 +292,35 @@ fun CuentaAtras(
                 Instant.now(),
                 fechaObjetivo
             )
-            delay(1000.milliseconds)
+            delay(2000.milliseconds)
         }
     }
 
 //    ESTILIZACIÓN DE LA CUENTA ATRÁS
     if (tiempoRestante.isNegative || tiempoRestante.isZero) {
-//        ¿POSIBILIDAD DE ALGÚN SONIDO O ANIMACIÓN?
-        Text(
-            text = "¡Desafío completado!",
-            fontSize = 25.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF1B5E20),
-            textAlign = TextAlign.Center,
-        )
+
+        val context = LocalContext.current
+        val soundPool = remember {
+            SoundPool.Builder()
+                .setMaxStreams(1)
+                .build()
+        }
+        val sonidoSuccess = remember {
+            soundPool.load(context, R.raw.exito ,1)
+        }
 
         LaunchedEffect(Unit) {
             soundPool.play(sonidoSuccess, 1f, 1f, 0, 0, 1f)
         }
+
+        Text(
+            text = "¡Desafío completado! \uD83C\uDF89",
+            fontSize = 25.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF1B5E20),
+            textAlign = TextAlign.Center,
+
+        )
 
 
     } else {
@@ -425,6 +431,18 @@ fun TarjetaDesafio(desafio: Desafio, modifier: Modifier = Modifier) {
             } else {
                 // --- Estado: desafío iniciado ---
 //                SE TOMA LA FECHA INICIO (SIEMPRE LA FECHA ACTUAL) Y EL VALOR DE FECHA OBJETIVO (LA FECHA ELEGIDA Y GUARDADA DESDE EL CALENDARIO). ESTOS DATOS SE TRATAN COMO SI NO PUDIERAN SER NULOS.
+                val context = LocalContext.current
+
+                val soundPool = remember {
+                    SoundPool.Builder()
+                        .setMaxStreams(1)
+                        .build()
+                }
+
+                val sonidoFallo = remember {
+                    soundPool.load(context, R.raw.error ,1)
+                }
+
                 CuentaAtras(
                     fechaInicio = fechaInicio!!,
                     fechaObjetivo = fechaObjetivo!!
@@ -458,12 +476,15 @@ fun TarjetaDesafio(desafio: Desafio, modifier: Modifier = Modifier) {
                             fechaInicio = null
                             fechaObjetivo = null
                             mostrarDialogo = false
+
+                            soundPool.play(sonidoFallo, 1f, 1f, 0, 0, 1f)
+
                         },
                         onCancelar = {
                             mostrarDialogo = false
                         })
-                }
             }
         }
     }
+}
 }

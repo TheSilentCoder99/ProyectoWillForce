@@ -261,7 +261,7 @@ fun FraseAleatoria() {
 //    Launchedeffect() Inicia una subrutina asociada solamente a este composable. Después delay pasa su ejecución durante 15 segundos y finalmente muestra la frase. Toodo esto ocurre únicamente dentro del composable que representa FraseAleatoria()
     LaunchedEffect(Unit) {
         while (true) {
-            delay(15_000.milliseconds)
+            delay(10_000.milliseconds)
             fraseAleatoria = frasesAleatorias.random()
         }
     }
